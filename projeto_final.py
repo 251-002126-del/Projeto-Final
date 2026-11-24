@@ -1,25 +1,19 @@
-# ==============================================================================
-# Projeto Final - Estruturas de Dados
-# Aluno: Natanael Antônio Dos Reis Santana | RA: 251-002126
-# Tema 5: Gerenciamento de Biblioteca
-# ==============================================================================
-
 from collections import deque
 
 NOME_ALUNO = "Natanael Antônio Dos Reis Santana"
 RA_ALUNO = "251-002126"
 
-ARQUIVO = "dados_sistema.txt"  
-SEP = "|"                      
+ARQUIVO = "dados_sistema.txt"
+SEP = "|"
 
 
-leitores = []        
-reservas = deque()   
-devolvidos = []      
-acervo = {}          
+leitores = []
+reservas = deque()
+devolvidos = []
+acervo = {}
+
 
 def ler_texto(mensagem):
-    """Lê um texto não vazio. Troca o separador '|' para não quebrar o arquivo."""
     while True:
         texto = input(mensagem).strip().replace(SEP, "/")
         if texto != "":
@@ -28,7 +22,6 @@ def ler_texto(mensagem):
 
 
 def ler_inteiro(mensagem):
-    """Lê um número inteiro; repete até o usuário digitar um valor válido."""
     while True:
         try:
             return int(input(mensagem).strip())
@@ -37,13 +30,12 @@ def ler_inteiro(mensagem):
 
 
 def ler_caminho(mensagem):
-    """Lê um caminho da árvore no formato 'Área > Subárea > Assunto'."""
     texto = ler_texto(mensagem)
     partes = [p.strip() for p in texto.split(">")]
     return [p for p in partes if p != ""]
 
+
 def buscar_leitor(id_leitor):
-    """Percorre a lista e devolve o leitor com o id informado (ou None)."""
     for leitor in leitores:
         if leitor["id"] == id_leitor:
             return leitor
@@ -52,7 +44,7 @@ def buscar_leitor(id_leitor):
 
 def cadastrar_leitor():
     id_leitor = ler_texto("ID do leitor: ")
-    if buscar_leitor(id_leitor) is not None:  
+    if buscar_leitor(id_leitor) is not None:
         print("Erro: já existe um leitor com esse ID.")
         return
     nome = ler_texto("Nome do leitor: ")
@@ -87,13 +79,14 @@ def remover_leitor():
     leitores.remove(leitor)
     print("Leitor removido com sucesso!")
 
+
 def reservar_livro():
     leitor = buscar_leitor(ler_texto("ID do leitor que está reservando: "))
     if leitor is None:
         print("Erro: leitor não cadastrado. Cadastre-o primeiro.")
         return
     livro = ler_texto("Título do livro: ")
-    reservas.append((livro, leitor["nome"]))  # entra no FIM da fila
+    reservas.append((livro, leitor["nome"]))
     print(f"Reserva registrada. Posição na fila: {len(reservas)}")
 
 
@@ -106,7 +99,6 @@ def listar_reservas():
 
 
 def atualizar_reserva():
-    """Altera o livro ou o leitor de uma reserva, sem mudar sua posição na fila."""
     if not reservas:
         print("A fila de reservas está vazia.")
         return
@@ -131,17 +123,16 @@ def atualizar_reserva():
 
 
 def atender_reserva():
-    """Remove e mostra o primeiro da fila (quem reservou há mais tempo)."""
     if not reservas:
         print("Não há reservas para atender.")
         return
-    livro, nome = reservas.popleft()  
+    livro, nome = reservas.popleft()
     print(f"Reserva atendida: '{livro}' liberado para {nome}.")
 
 
 def devolver_livro():
     livro = ler_texto("Título do livro devolvido: ")
-    devolvidos.append(livro)  
+    devolvidos.append(livro)
     print("Livro colocado no topo da pilha de triagem.")
 
 
@@ -149,6 +140,7 @@ def listar_devolvidos():
     if not devolvidos:
         print("A pilha de devolvidos está vazia.")
         return
+
     for i, livro in enumerate(reversed(devolvidos)):
         marca = "  <-- TOPO" if i == 0 else ""
         print(f"- {livro}{marca}")
@@ -156,7 +148,6 @@ def listar_devolvidos():
 
 
 def atualizar_topo():
-    """Corrige o título do livro que está no topo (único acessível na pilha)."""
     if not devolvidos:
         print("A pilha de devolvidos está vazia.")
         return
@@ -166,16 +157,14 @@ def atualizar_topo():
 
 
 def triar_livro():
-    """Remove o livro do topo para recolocá-lo na estante."""
     if not devolvidos:
         print("Não há livros para triar.")
         return
-    livro = devolvidos.pop()  # pop: sai do TOPO
+    livro = devolvidos.pop()
     print(f"Livro '{livro}' triado e enviado para a estante.")
 
 
 def navegar(caminho):
-    """Desce na árvore seguindo o caminho. Devolve o nó final ou None."""
     no = acervo
     for parte in caminho:
         if parte not in no:
@@ -185,14 +174,12 @@ def navegar(caminho):
 
 
 def adicionar_no_acervo(caminho):
-    """Insere o caminho completo, criando os níveis que ainda não existem."""
     no = acervo
     for parte in caminho:
-        no = no.setdefault(parte, {})  
+        no = no.setdefault(parte, {})
 
 
 def listar_acervo(no=None, nivel=0):
-    """Imprime a árvore de forma recursiva, com recuo por nível."""
     if no is None:
         no = acervo
         if not acervo:
@@ -204,13 +191,12 @@ def listar_acervo(no=None, nivel=0):
 
 
 def renomear_no(caminho, novo_nome):
-    """Renomeia o último nó do caminho mantendo seus filhos e a ordem."""
     if navegar(caminho) is None:
         return False
     pai = navegar(caminho[:-1]) if len(caminho) > 1 else acervo
     antigo = caminho[-1]
     if novo_nome in pai and novo_nome != antigo:
-        return False  
+        return False
     reconstruido = {}
     for chave, valor in pai.items():
         reconstruido[novo_nome if chave == antigo else chave] = valor
@@ -220,7 +206,6 @@ def renomear_no(caminho, novo_nome):
 
 
 def remover_no(caminho):
-    """Remove o nó (e toda a sua subárvore)."""
     if navegar(caminho) is None:
         return False
     pai = navegar(caminho[:-1]) if len(caminho) > 1 else acervo
@@ -229,7 +214,6 @@ def remover_no(caminho):
 
 
 def caminhos_folhas(no, prefixo=()):
-    """Gera o caminho de cada folha; é usado para gravar a árvore no arquivo."""
     for nome, filhos in no.items():
         novo = prefixo + (nome,)
         if filhos:
@@ -265,28 +249,52 @@ def menu_remover_no():
     else:
         print("Remoção cancelada.")
 
+
+def gerar_linhas():
+    linhas = []
+    for l in leitores:
+        linhas.append(f"LISTA{SEP}{l['id']}{SEP}{l['nome']}")
+    for livro, nome in reservas:
+        linhas.append(f"FILA{SEP}{livro}{SEP}{nome}")
+    for livro in devolvidos:
+        linhas.append(f"PILHA{SEP}{livro}")
+    for caminho in caminhos_folhas(acervo):
+        linhas.append(f"ARVORE{SEP}{SEP.join(caminho)}")
+    return linhas
+
+
+def ha_alteracoes_nao_salvas():
+    atual = gerar_linhas()
+    try:
+        with open(ARQUIVO, "r", encoding="utf-8") as f:
+            salvo = [linha.strip() for linha in f if linha.strip() != ""]
+    except FileNotFoundError:
+        return len(atual) > 0
+    return salvo != atual
+
+
 def salvar_dados():
-    """Grava o estado atual da memória em dados_sistema.txt (sobrescreve)."""
+    linhas = gerar_linhas()
     with open(ARQUIVO, "w", encoding="utf-8") as f:
-        for l in leitores:
-            f.write(f"LISTA{SEP}{l['id']}{SEP}{l['nome']}\n")
-        for livro, nome in reservas:          # do início para o fim da fila
-            f.write(f"FILA{SEP}{livro}{SEP}{nome}\n")
-        for livro in devolvidos:              # da base para o topo da pilha
-            f.write(f"PILHA{SEP}{livro}\n")
-        for caminho in caminhos_folhas(acervo):
-            f.write(f"ARVORE{SEP}{SEP.join(caminho)}\n")
+        for linha in linhas:
+            f.write(linha + "\n")
     print(f"Dados salvos em '{ARQUIVO}'.")
 
 
 def carregar_dados():
-    """Limpa a memória e reconstrói as estruturas a partir do arquivo."""
     try:
         with open(ARQUIVO, "r", encoding="utf-8") as f:
             linhas = f.readlines()
     except FileNotFoundError:
         print("Arquivo de dados ainda não existe. Salve os dados primeiro.")
         return
+
+
+    if ha_alteracoes_nao_salvas():
+        print("Atenção: há alterações que ainda NÃO foram salvas.")
+        if input("Carregar mesmo assim e descartá-las? (S/N): ").strip().upper() != "S":
+            print("Carregamento cancelado. Use a opção 5 para salvar antes.")
+            return
 
     leitores.clear()
     reservas.clear()
@@ -296,6 +304,7 @@ def carregar_dados():
     for linha in linhas:
         partes = linha.strip().split(SEP)
         tipo = partes[0]
+
         if tipo == "LISTA" and len(partes) == 3:
             leitores.append({"id": partes[1], "nome": partes[2]})
         elif tipo == "FILA" and len(partes) == 3:
@@ -308,7 +317,6 @@ def carregar_dados():
 
 
 def submenu(titulo, opcoes):
-    """Mostra um submenu e executa a função da opção escolhida até voltar (0)."""
     while True:
         print(f"\n--- {titulo} ---")
         for numero, (texto, _) in opcoes.items():
@@ -366,7 +374,7 @@ def menu_principal():
     print("=" * 60)
 
     while True:
-        print("\n Menu de escolhas")
+        print("\n===== MENU PRINCIPAL =====")
         print("1. Leitores (Lista)")
         print("2. Reservas (Fila)")
         print("3. Devolvidos (Pilha)")
@@ -389,7 +397,11 @@ def menu_principal():
         elif opcao == "6":
             carregar_dados()
         elif opcao == "0":
-            print("Encerrando o programa. Dados não salvos serão perdidos.")
+            if ha_alteracoes_nao_salvas():
+                resp = input("Há alterações não salvas. Salvar antes de sair? (S/N): ").strip().upper()
+                if resp == "S":
+                    salvar_dados()
+            print("Encerrando o programa.")
             break
         else:
             print("Opção inválida! Escolha uma das opções do menu.")
